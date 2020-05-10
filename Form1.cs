@@ -90,7 +90,13 @@ namespace InstaRefollow
                                    "if(message == 'フォローする'){buttons[0].click();}" +
                                    "else{buttons[1].click();} ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
-                        
+
+
+                        // Scroll down the members list.
+                        Thread.Sleep(3000);
+                        jsScript = "var inputs = document.getElementsByClassName('isgrP'); " +
+                                   "inputs[0].scrollTo(0, 10000); ";
+                        chromeBrowser.ExecuteScriptAsync(jsScript);
                     }
                     
 
