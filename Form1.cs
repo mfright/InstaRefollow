@@ -39,8 +39,14 @@ namespace InstaRefollow
                     // Load @megafloat4
                     chromeBrowser.Load("https://instagram.com/megafloat4");
 
+
+
+                    // Reload @megafloat4
+                    Thread.Sleep(5000);
+                    chromeBrowser.Load("https://instagram.com/megafloat4");
+
                     // Click "following members".
-                    Thread.Sleep(3000);
+                    Thread.Sleep(10000);
                     string jsScript = "var inputs = document.getElementsByClassName('-nal3 '); " +
                                       "inputs[2].click(); ";
                     chromeBrowser.ExecuteScriptAsync(jsScript);
@@ -49,7 +55,7 @@ namespace InstaRefollow
                     for(int counter = 0; counter < 100; counter++)
                     {
                         // Click first "Unfollow" button.
-                        Thread.Sleep(30000);
+                        Thread.Sleep(10000);
                         jsScript = "var buttons = document.getElementsByClassName('sqdOP  L3NKy    _8A5w5    '); " +
                                    "var firstElem = buttons[0];" +
                                    "var message = firstElem.innerText;" +
@@ -58,13 +64,13 @@ namespace InstaRefollow
                         chromeBrowser.ExecuteScriptAsync(jsScript);
 
                         // Click "OK".
-                        Thread.Sleep(3000);
+                        Thread.Sleep(10000);
                         jsScript = "var inputs = document.getElementsByClassName('aOOlW -Cab_   '); " +
                                                       "inputs[0].click(); ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
 
                         // Scroll down the members list.
-                        Thread.Sleep(3000);
+                        Thread.Sleep(10000);
                         jsScript = "var inputs = document.getElementsByClassName('isgrP'); " +
                                    "inputs[0].scrollTo(0, 10000); ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
@@ -75,7 +81,7 @@ namespace InstaRefollow
                     chromeBrowser.Load("https://instagram.com/megafloat4");
 
                     // Click "following members".
-                    Thread.Sleep(3000);
+                    Thread.Sleep(10000);
                     jsScript = "var inputs = document.getElementsByClassName('-nal3 '); " +
                                       "inputs[2].click(); ";
                     chromeBrowser.ExecuteScriptAsync(jsScript);
@@ -83,7 +89,7 @@ namespace InstaRefollow
                     for (int counter = 0; counter < 100; counter++)
                     {
                         // Click "follow".
-                        Thread.Sleep(30000);
+                        Thread.Sleep(20000);
                         jsScript = "var buttons = document.getElementsByClassName('sqdOP  L3NKy   y3zKF     '); " +
                                    "var firstElem = buttons[0];" +
                                    "var message = firstElem.innerText;" +
@@ -93,7 +99,7 @@ namespace InstaRefollow
 
 
                         // Scroll down the members list.
-                        Thread.Sleep(3000);
+                        Thread.Sleep(10000);
                         jsScript = "var inputs = document.getElementsByClassName('isgrP'); " +
                                    "inputs[0].scrollTo(0, 10000); ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
