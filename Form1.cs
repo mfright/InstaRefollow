@@ -17,12 +17,13 @@ namespace InstaRefollow
 {
     public partial class Form1 : Form
     {
+
         public ChromiumWebBrowser chromeBrowser;
 
         Thread thread;
 
         // Form reference for Anti-minimize.
-        static Form myForm;
+        static Form1 myForm;
 
         // WindowState for Anti-minimize.
         static FormWindowState preWindowState;
@@ -50,7 +51,27 @@ namespace InstaRefollow
 
         }
 
-        
+
+
+        // Delegate for setText()
+        public delegate void setTextDelegate();
+
+        // Message for setText()
+        string message = "";
+
+        // Set text.
+        public void setText()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new setTextDelegate(this.setText));
+                return;
+            }
+
+            this.Text = "InstaRefollow - " + message;
+
+        }
+
 
 
 
@@ -71,10 +92,35 @@ namespace InstaRefollow
                 
                 thread = new Thread(new ThreadStart(() =>
                 {
+
+                    // Number of @megafloat4's followings.
+                    int limitter = loadText("limitter.txt");
+
+                    // Limit number of refollowing at this time.
+                    int daymax = loadText("daymax.txt");
+
+                    // Offsset number of refollowing at this time.
+                    int offset = loadText("offset.txt");
+
+                    if( (offset + daymax) > limitter)
+                    {
+                        daymax = limitter - offset;
+                    }
+
+                    message = "Please login in 1 minute. Then minimize this window for few hours. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
+
+
+
+
                     // Wait until login & Load @megafloat4
                     Thread.Sleep(60000);
                     UpWindow();
                     chromeBrowser.Load("https://instagram.com/megafloat4");
+
+                    message = "Loading accounts to unfollow. Then minimize this window for few hours. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
+
 
                     // Click "following members".
                     Thread.Sleep(10000);
@@ -98,7 +144,7 @@ namespace InstaRefollow
 
 
                     // Load all following members.
-                    for(int count = 0; count < 20; count++)
+                    for(int count = 0; count < limitter/5; count++)
                     {
                         // Scroll down the members list.
                         Thread.Sleep(10000);
@@ -108,16 +154,24 @@ namespace InstaRefollow
                         chromeBrowser.ExecuteScriptAsync(jsScript);
                     }
 
-                    for(int counter = 0; counter < 100; counter++)
+
+                    //--------------------------------
+                    // Unfollow each accounts.
+                    //--------------------------------
+
+                    message = "Unfollowing the accounts. Leave this window for few hours. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
+
+                    for (int counter = offset; counter < (offset + daymax); counter++)
                     {
-                        // Click first "Unfollow" button.
+                        // Click "Unfollow" button of offset.
                         Thread.Sleep(10000);
                         UpWindow();
                         jsScript = "var buttons = document.getElementsByClassName('sqdOP  L3NKy    _8A5w5    '); " +
-                                   "var firstElem = buttons[0];" +
+                                   "var firstElem = buttons[" + offset + "];" +
                                    "var message = firstElem.innerText;" +
-                                   "if(message == 'フォロー中'){buttons[0].click();}" +
-                                   "else{buttons[1].click();} ";
+                                   "if(message == 'フォロー中'){buttons[" + offset + "].click();}" +
+                                   "else{buttons[" + (offset+1) + "].click();} ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
 
                         // Click "OK".
@@ -136,12 +190,16 @@ namespace InstaRefollow
                     }
 
 
+                    message = "Loading accounts to follow. Then minimize this window for few hours. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
+
+
                     // Reload @megafloat4
                     Thread.Sleep(10000);
                     UpWindow();
                     chromeBrowser.Load("https://instagram.com/megafloat4");
 
-                    // Click "following members".
+                    // Click "FOLLOWING members".
                     Thread.Sleep(10000);
                     UpWindow();
                     jsScript = "var inputs = document.getElementsByClassName('-nal3 '); " +
@@ -149,7 +207,7 @@ namespace InstaRefollow
                     chromeBrowser.ExecuteScriptAsync(jsScript);
 
                     // Load all following members.
-                    for (int count = 0; count < 20; count++)
+                    for (int count = 0; count < limitter/5; count++)
                     {
                         // Scroll down the members list.
                         Thread.Sleep(10000);
@@ -160,9 +218,16 @@ namespace InstaRefollow
                     }
 
 
-                    for (int counter = 0; counter < 100; counter++)
+                    //-------------------------------
+                    // FOLLOW each accounts.
+                    //-------------------------------
+                    message = "Following the accounts. Leave this window for few hours. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
+
+                    // FOLLOW buttons begin from [0]!
+                    for (int counter = 0; counter < limitter; counter++)
                     {
-                        // Click "follow".
+                        // Click the first "follow" button.
                         Thread.Sleep(20000);
                         UpWindow();
                         jsScript = "var buttons = document.getElementsByClassName('sqdOP  L3NKy   y3zKF     '); " +
@@ -182,6 +247,21 @@ namespace InstaRefollow
                     }
                     
 
+
+
+                    // Save next offset.
+                    if(offset + daymax >= limitter)
+                    {
+                        writeText("offset.txt", 0);
+                    }
+                    else
+                    {
+                        int new_offset = offset + daymax;
+                        writeText("offset.txt", new_offset);
+                    }
+
+                    message = "FINISHED refollowing accounts. " + offset + "～" + (offset + daymax) + "/" + limitter;
+                    setText();
                 }));
 
                 // Run the thread above.
@@ -238,6 +318,29 @@ namespace InstaRefollow
             Cef.Shutdown();
 
             thread.Abort();
+        }
+
+
+        // Load integer from a text-file.
+        private int loadText(String fileName)
+        {
+            StreamReader sr = new StreamReader(fileName, Encoding.GetEncoding("Shift_JIS"));
+
+            string text = sr.ReadToEnd();
+
+            sr.Close();
+
+            return int.Parse(text);
+        }
+
+        // Write integer into a text-file.
+        private void writeText(string fileName, int value)
+        {
+            string message = value + "";
+
+            StreamWriter writer = new StreamWriter(fileName, false, Encoding.GetEncoding("Shift_JIS"));
+            writer.WriteLine(message);
+            writer.Close();
         }
     }
 }

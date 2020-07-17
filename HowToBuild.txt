@@ -1,3 +1,4 @@
 VisualStudio2017で、WindowsFormApplication作成。
 NugetでCefSharp.WinFormをインストール。
 Form.csへ同梱Form.csのコードをコピペ。
+同梱のtxtファイルをコンパイル済み実行ファイルと同じ場所へ置く。
