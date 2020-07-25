@@ -13,11 +13,11 @@ using CefSharp;
 using CefSharp.WinForms;
 using System.Threading;
 
+
 namespace InstaRefollow
 {
     public partial class Form1 : Form
     {
-
         public ChromiumWebBrowser chromeBrowser;
 
         Thread thread;
@@ -72,8 +72,21 @@ namespace InstaRefollow
 
         }
 
+        // Delegate for setText()
+        public delegate void formCloseDelegate();
+        
+        // Form close.
+        public void formClose()
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke(new setTextDelegate(this.formClose));
+                return;
+            }
 
+            myForm.Close();
 
+        }
 
         public Form1()
         {
@@ -89,7 +102,7 @@ namespace InstaRefollow
 
             try
             {
-                
+
                 thread = new Thread(new ThreadStart(() =>
                 {
 
@@ -102,7 +115,7 @@ namespace InstaRefollow
                     // Offsset number of refollowing at this time.
                     int offset = loadText("offset.txt");
 
-                    if( (offset + daymax) > limitter)
+                    if ((offset + daymax) > limitter)
                     {
                         daymax = limitter - offset;
                     }
@@ -144,7 +157,7 @@ namespace InstaRefollow
 
 
                     // Load all following members.
-                    for(int count = 0; count < limitter/5; count++)
+                    for (int count = 0; count < limitter / 5; count++)
                     {
                         // Scroll down the members list.
                         Thread.Sleep(10000);
@@ -171,7 +184,7 @@ namespace InstaRefollow
                                    "var firstElem = buttons[" + offset + "];" +
                                    "var message = firstElem.innerText;" +
                                    "if(message == 'フォロー中'){buttons[" + offset + "].click();}" +
-                                   "else{buttons[" + (offset+1) + "].click();} ";
+                                   "else{buttons[" + (offset + 1) + "].click();} ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
 
                         // Click "OK".
@@ -207,7 +220,7 @@ namespace InstaRefollow
                     chromeBrowser.ExecuteScriptAsync(jsScript);
 
                     // Load all following members.
-                    for (int count = 0; count < limitter/5; count++)
+                    for (int count = 0; count < limitter / 5; count++)
                     {
                         // Scroll down the members list.
                         Thread.Sleep(10000);
@@ -245,12 +258,12 @@ namespace InstaRefollow
                                    "inputs[0].scrollTo(0, 10000); ";
                         chromeBrowser.ExecuteScriptAsync(jsScript);
                     }
-                    
+
 
 
 
                     // Save next offset.
-                    if(offset + daymax >= limitter)
+                    if (offset + daymax >= limitter)
                     {
                         writeText("offset.txt", 0);
                     }
@@ -262,10 +275,16 @@ namespace InstaRefollow
 
                     message = "FINISHED refollowing accounts. " + offset + "～" + (offset + daymax) + "/" + limitter;
                     setText();
+
+                    Thread.Sleep(60000);
+
+                    // Exit application.
+                    formClose();
+
                 }));
 
                 // Run the thread above.
-                thread.Start();               
+                thread.Start();
 
 
             }
@@ -274,10 +293,13 @@ namespace InstaRefollow
                 this.Invoke(new Action(() => { MessageBox.Show(this, ex.Message, "エラー", MessageBoxButtons.OK, MessageBoxIcon.Error); }));
             }
         }
+        
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
-            chromeBrowser.ShowDevTools();
+            Cef.Shutdown();
+
+            Application.Exit();
         }
 
         public void InitializeChromium()
@@ -285,7 +307,7 @@ namespace InstaRefollow
             CefSettings settings = new CefSettings();
             settings.Locale = "ja";
             settings.AcceptLanguageList = "ja-JP";
-            settings.CachePath = "cache";
+            settings.CachePath = System.Environment.CurrentDirectory+ "\\cache";
             settings.PersistSessionCookies = true;
 
             // Initialize cef with the provided settings
@@ -307,18 +329,18 @@ namespace InstaRefollow
             browserSettings.FileAccessFromFileUrls = CefState.Enabled;
             browserSettings.UniversalAccessFromFileUrls = CefState.Enabled;
             chromeBrowser.BrowserSettings = browserSettings;
-            
+
         }
-        
 
 
 
+        /*
         private void Form1_FormClosing(object sender, FormClosingEventArgs e)
         {
             Cef.Shutdown();
 
             thread.Abort();
-        }
+        } */
 
 
         // Load integer from a text-file.
